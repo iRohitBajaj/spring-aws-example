@@ -1,0 +1,11 @@
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    credentials:
+      accessKey:
+      secretKey: 
+
+s3:
+  bucketname: report-resource
+  baseUrl: s3://
