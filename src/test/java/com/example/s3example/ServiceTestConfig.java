@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
 public class ServiceTestConfig {
@@ -16,5 +17,10 @@ public class ServiceTestConfig {
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertiesResolver() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 }

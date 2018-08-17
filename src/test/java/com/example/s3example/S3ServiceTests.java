@@ -4,29 +4,34 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes={ServiceTestConfig.class}, webEnvironment= SpringBootTest.WebEnvironment.NONE)
+@ContextConfiguration(classes={ServiceTestConfig.class})
+@TestPropertySource(properties = {
+        "s3.bucketname=report-resource","s3.baseUrl=s3://"
+})
 public class S3ServiceTests {
 
     @Autowired
@@ -50,7 +55,7 @@ public class S3ServiceTests {
     StoredObject storedObject;
 
     @Before
-    public void setUp(){
+    public void setUp() throws IOException {
         Person person = Person.builder()
                 .height(5.0)
                 .name("Test")
@@ -60,7 +65,6 @@ public class S3ServiceTests {
                 .key("Test")
                 .build();
         when(amazonS3.getObject(any())).thenReturn(s3Object);
-        when(s3Object.getObjectContent()).thenReturn(mock(S3ObjectInputStream.class));
     }
 
     @Test

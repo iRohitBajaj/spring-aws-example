@@ -35,20 +35,20 @@ public class S3Service {
     public String upload(StoredObject object) {
 
         byte[] bytes = new byte[0];
-        InputStream inputStream = null;
+        InputStream inputStream =  null;
         String objectUrl = this.S3baseUrl + this.bucket + "/" + object.getKey();
         object.setBucket(this.bucket);
         object.setUrl(objectUrl);
 
         try {
             bytes = objectMapper.writeValueAsBytes(object);
-
+            inputStream = new ByteArrayInputStream(bytes);
             ObjectMetadata objectMetadata = new ObjectMetadata();
 
             if (null != bytes) {
                 objectMetadata.setContentLength(bytes.length);
                 objectMetadata.setContentMD5(new String(org.apache.commons.codec.binary.Base64.encodeBase64(DigestUtils.md5(bytes))));
-                inputStream = new ByteArrayInputStream(bytes);
+
             }
             PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, object.getKey(), inputStream, objectMetadata);
             putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
@@ -58,6 +58,7 @@ public class S3Service {
             return null;
         } finally {
             try {
+                if(null != inputStream)
                 inputStream.close();
             } catch (IOException e) {
             }
@@ -71,6 +72,7 @@ public class S3Service {
         StoredObject storedObject = null;
         S3Object s3Object = amazonS3.getObject(getObjectRequest);
         try {
+            if(null != s3Object && null != s3Object.getObjectContent())
             storedObject = objectMapper.readValue(s3Object.getObjectContent(), StoredObject.class);
         } catch (IOException e) {
             e.printStackTrace();
