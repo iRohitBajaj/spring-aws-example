@@ -2,6 +2,7 @@ package com.example.s3example;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class S3Controller {
 
     @GetMapping("")
     public ResponseEntity<List<S3ObjectSummary>> all() {
-        return this.s3Service.listAll();
+        return new ResponseEntity<>(s3Service.listAll(), HttpStatus.OK);
     }
 
     @PostMapping("")
@@ -36,12 +37,12 @@ public class S3Controller {
                 .key(person.getName())
                 .contents(person.toString())
                 .build();
-        return this.s3Service.upload(object);
+        return new ResponseEntity<>(s3Service.upload(object), HttpStatus.OK);
     }
 
     @GetMapping("/{key}")
     public ResponseEntity<StoredObject> get(@PathVariable("key") String key) {
-        return this.s3Service.downloadByKey(key);
+        return new ResponseEntity<>(s3Service.downloadByKey(key), HttpStatus.OK);
     }
 
     @DeleteMapping("/{key}")

@@ -1,9 +1,10 @@
 package com.example.s3example;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class StoredObject {
 

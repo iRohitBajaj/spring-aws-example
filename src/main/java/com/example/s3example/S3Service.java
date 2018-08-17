@@ -2,10 +2,11 @@ package com.example.s3example;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -15,8 +16,9 @@ import java.util.stream.Collectors;
 @Service
 public class S3Service {
 
-    @Autowired
-    private AmazonS3 amazonS3;
+    private final ObjectMapper objectMapper;
+
+    private final AmazonS3 amazonS3;
 
     @Value("${s3.baseUrl}")
     private String S3baseUrl;
@@ -24,55 +26,71 @@ public class S3Service {
     @Value("${s3.bucketname}")
     private String bucket;
 
+    @Autowired
+    public S3Service(ObjectMapper objectMapper, AmazonS3 amazonS3) {
+        this.objectMapper = objectMapper;
+        this.amazonS3 = amazonS3;
+    }
 
-    public ResponseEntity<String> upload(StoredObject object) {
+
+    public String upload(StoredObject object) {
 
         String objectUrl = this.S3baseUrl + this.bucket +"/" + object.getKey();
+        object.setBucket(this.bucket);
+        object.setUrl(objectUrl);
 
-        InputStream inputStream = new ByteArrayInputStream(object.toString().getBytes());
+        byte[] bytes = new byte[0];
+        try {
+            bytes = objectMapper.writeValueAsBytes(object);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(bytes.length);
+        objectMetadata.setContentMD5(new String(org.apache.commons.codec.binary.Base64.encodeBase64(DigestUtils.md5(bytes))));
 
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, object.getKey(), inputStream, objectMetadata);
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+
+        PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, object.getKey(), inputStream, objectMetadata);
 
         putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
 
         PutObjectResult putObjectResult = amazonS3.putObject(putObjectRequest);
 
-        return new ResponseEntity<>(objectUrl, HttpStatus.OK);
+        return objectUrl;
     }
 
-    public ResponseEntity<StoredObject> downloadByKey(String key){
+    public StoredObject downloadByKey(String key){
 
-        GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, key);
-
+        GetObjectRequest getObjectRequest = new GetObjectRequest(this.bucket, key);
+        StoredObject storedObject = null;
         S3Object s3Object = amazonS3.getObject(getObjectRequest);
-
-        S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
-
+        //S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
+        //String contents = convertStreamToString(objectInputStream);
         String objectUrl = this.S3baseUrl + this.bucket +"/" + key;
+        try {
+            storedObject = objectMapper.readValue(s3Object.getObjectContent(), StoredObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        String contents = new BufferedReader(new InputStreamReader(objectInputStream))
-                .lines().collect(Collectors.joining("\n"));
-
-        return new ResponseEntity<>(StoredObject.builder()
-                .bucket(this.bucket)
-                .key(key)
-                .url(objectUrl)
-                .contents(contents)
-                .build(), HttpStatus.OK);
+        return storedObject;
     }
 
     public void deleteByKey(String key){
         amazonS3.deleteObject(this.bucket, key);
     }
 
-    public ResponseEntity<List<S3ObjectSummary>> listAll() {
+    public List<S3ObjectSummary> listAll() {
         ObjectListing objectListing = amazonS3.listObjects(new ListObjectsRequest().withBucketName(bucket));
 
-        List<S3ObjectSummary> s3ObjectSummaries = objectListing.getObjectSummaries();
+        return objectListing.getObjectSummaries();
 
-        return new ResponseEntity<>(s3ObjectSummaries, HttpStatus.OK);
     }
 
+    public String convertStreamToString(S3ObjectInputStream objectInputStream){
+        return new BufferedReader(new InputStreamReader(objectInputStream))
+                .lines().collect(Collectors.joining("\n"));
+    }
 }
