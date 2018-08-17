@@ -7,11 +7,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class StoredObject<T> {
+public class StoredObject {
 
     private String bucket;
     private String key;
     private String url;
-    @JsonProperty("contents")
-    private T contents;
+    private Person contents;
 }

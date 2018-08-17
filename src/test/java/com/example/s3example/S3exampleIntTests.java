@@ -65,7 +65,7 @@ public class S3exampleIntTests {
 		StoredObject object = s3Service.downloadByKey("Test");
 		Assertions.assertThat(object.getKey()).isEqualTo(storedObject.getKey());
 		try {
-			Assertions.assertThat(jsonTester.write((Person)object.getContents())).isEqualTo(jsonTester.write((Person)storedObject.getContents()));
+			Assertions.assertThat(jsonTester.write(object.getContents())).isEqualToJson(jsonTester.write(storedObject.getContents()).getJson());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
