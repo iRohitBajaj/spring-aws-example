@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class S3Service {
@@ -37,7 +36,6 @@ public class S3Service {
 
         byte[] bytes = new byte[0];
         InputStream inputStream = null;
-
         String objectUrl = this.S3baseUrl + this.bucket + "/" + object.getKey();
         object.setBucket(this.bucket);
         object.setUrl(objectUrl);
@@ -58,6 +56,11 @@ public class S3Service {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+            }
         }
         return objectUrl;
     }
@@ -67,8 +70,6 @@ public class S3Service {
         GetObjectRequest getObjectRequest = new GetObjectRequest(this.bucket, key);
         StoredObject storedObject = null;
         S3Object s3Object = amazonS3.getObject(getObjectRequest);
-        //S3ObjectInputStream objectInputStream = s3Object.getObjectContent();
-        //String contents = convertStreamToString(objectInputStream);
         try {
             storedObject = objectMapper.readValue(s3Object.getObjectContent(), StoredObject.class);
         } catch (IOException e) {
@@ -87,8 +88,4 @@ public class S3Service {
 
     }
 
-    private String convertStreamToString(S3ObjectInputStream objectInputStream) {
-        return new BufferedReader(new InputStreamReader(objectInputStream))
-                .lines().collect(Collectors.joining("\n"));
-    }
 }
