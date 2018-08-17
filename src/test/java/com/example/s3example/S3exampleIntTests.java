@@ -1,6 +1,7 @@
 package com.example.s3example;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.findify.s3mock.S3Mock;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -8,11 +9,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.IOException;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestConfig.class})
+@JsonTest
+@SpringBootTest(classes = {IntegrationTestConfig.class, ServiceTestConfig.class})
 public class S3exampleIntTests {
 
 	@Autowired
@@ -21,9 +27,15 @@ public class S3exampleIntTests {
 	@Autowired
 	AmazonS3 amazonS3;
 
+	@Autowired
+	ObjectMapper objectMapper;
+
 	StoredObject storedObject;
 
 	S3Mock api;
+
+	@Autowired
+	private JacksonTester<Person> jsonTester;
 
 	@Before
 	public void setUp(){
@@ -34,7 +46,7 @@ public class S3exampleIntTests {
 				.name("Test")
 				.build();
 		storedObject = StoredObject.builder()
-				.contents(person.toString())
+				.contents(person)
 				.key("Test")
 				.build();
 
@@ -52,7 +64,11 @@ public class S3exampleIntTests {
 	public void downloadFile() {
 		StoredObject object = s3Service.downloadByKey("Test");
 		Assertions.assertThat(object.getKey()).isEqualTo(storedObject.getKey());
-		Assertions.assertThat(object.getContents()).isEqualTo(storedObject.getContents());
+		try {
+			Assertions.assertThat(jsonTester.write((Person)object.getContents())).isEqualTo(jsonTester.write((Person)storedObject.getContents()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@After

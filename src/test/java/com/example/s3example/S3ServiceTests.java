@@ -11,39 +11,31 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes={S3TestConfig.class}, webEnvironment= SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes={ServiceTestConfig.class}, webEnvironment= SpringBootTest.WebEnvironment.NONE)
 public class S3ServiceTests {
 
     @Autowired
-    @SpyBean
     S3Service s3Service;
 
     @MockBean
     AmazonS3 amazonS3;
 
-    @MockBean
+    @Autowired
     ObjectMapper objectMapper;
 
     @MockBean
@@ -64,12 +56,11 @@ public class S3ServiceTests {
                 .name("Test")
                 .build();
         storedObject = StoredObject.builder()
-                .contents(person.toString())
+                .contents(person)
                 .key("Test")
                 .build();
         when(amazonS3.getObject(any())).thenReturn(s3Object);
         when(s3Object.getObjectContent()).thenReturn(mock(S3ObjectInputStream.class));
-        //when(s3Service.convertStreamToString(any())).thenReturn(anyString());
     }
 
     @Test

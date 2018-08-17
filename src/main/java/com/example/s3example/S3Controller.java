@@ -19,12 +19,6 @@ public class S3Controller {
         this.s3Service = s3Service;
     }
 
-//    private final S3CloudService s3Service;
-//
-//    @Autowired
-//    public S3Controller(S3CloudService s3CloudService) {
-//        this.s3CloudService = s3CloudService;
-//    }
 
     @GetMapping("")
     public ResponseEntity<List<S3ObjectSummary>> all() {
@@ -33,15 +27,15 @@ public class S3Controller {
 
     @PostMapping("")
     public ResponseEntity<String> create(@RequestBody Person person) {
-        StoredObject object =StoredObject.builder()
+        StoredObject object = StoredObject.builder()
                 .key(person.getName())
-                .contents(person.toString())
+                .contents(person)
                 .build();
         return new ResponseEntity<>(s3Service.upload(object), HttpStatus.OK);
     }
 
     @GetMapping("/{key}")
-    public ResponseEntity<StoredObject> get(@PathVariable("key") String key) {
+    public ResponseEntity get(@PathVariable("key") String key) {
         return new ResponseEntity<>(s3Service.downloadByKey(key), HttpStatus.OK);
     }
 
