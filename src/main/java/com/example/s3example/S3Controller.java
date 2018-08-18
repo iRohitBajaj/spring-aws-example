@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController()
 @RequestMapping(value = "/persons")
@@ -26,12 +28,12 @@ public class S3Controller {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> create(@RequestBody Person person) {
+    public ResponseEntity<Map<String, String>> create(@RequestBody Person person) {
         StoredObject object = StoredObject.builder()
                 .key(person.getName())
                 .contents(person)
                 .build();
-        return new ResponseEntity<>(s3Service.upload(object), HttpStatus.OK);
+        return new ResponseEntity<>(Collections.singletonMap("objectUrl", s3Service.upload(object)), HttpStatus.OK);
     }
 
     @GetMapping("/{key}")
