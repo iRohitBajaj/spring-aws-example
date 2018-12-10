@@ -5,37 +5,32 @@ import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-@Service
 public class S3Service {
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();;
 
     private final AmazonS3 amazonS3;
 
-    @Value("${s3.baseUrl}")
-    private String S3baseUrl;
+    private String s3baseUrl;
 
-    @Value("${s3.bucketname}")
     private String bucket;
 
-    @Autowired
-    public S3Service(ObjectMapper objectMapper, AmazonS3 amazonS3) {
-        this.objectMapper = objectMapper;
+    public S3Service(AmazonS3 amazonS3, String s3baseUrl, String bucket) {
         this.amazonS3 = amazonS3;
+        this.s3baseUrl = s3baseUrl;
+        this.bucket = bucket;
     }
-
 
     public String upload(StoredObject object) {
 
         byte[] bytes = new byte[0];
-        String objectUrl = this.S3baseUrl + this.bucket + "/" + object.getKey();
+        String objectUrl = this.s3baseUrl + this.bucket + "/" + object.getKey();
         object.setBucket(this.bucket);
         object.setUrl(objectUrl);
 

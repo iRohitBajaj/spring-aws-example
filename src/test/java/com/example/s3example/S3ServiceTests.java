@@ -37,11 +37,8 @@ public class S3ServiceTests {
     @Autowired
     S3Service s3Service;
 
-    @MockBean
-    AmazonS3 amazonS3;
-
     @Autowired
-    ObjectMapper objectMapper;
+    AmazonS3 amazonS3;
 
     @MockBean
     S3Object s3Object;

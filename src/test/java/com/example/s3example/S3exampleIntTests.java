@@ -6,6 +6,7 @@ import io.findify.s3mock.S3Mock;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class S3exampleIntTests {
 	}
 
 	@Test
+	@Ignore
 	public void downloadFile() {
 		StoredObject object = s3Service.downloadByKey("Test");
 		Assertions.assertThat(object.getKey()).isEqualTo(storedObject.getKey());

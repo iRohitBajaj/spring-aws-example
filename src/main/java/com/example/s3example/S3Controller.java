@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class S3Controller {
 
 
     @GetMapping("")
-    public ResponseEntity<List<S3ObjectSummary>> all() {
+    public ResponseEntity<List<S3ObjectSummary>> all(ServletRequest request) {
         return new ResponseEntity<>(s3Service.listAll(), HttpStatus.OK);
     }
 
