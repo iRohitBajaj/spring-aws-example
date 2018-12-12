@@ -13,13 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
 @JsonTest
-@SpringBootTest(classes = {IntegrationTestConfig.class, ServiceTestConfig.class})
+@ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class S3exampleIntTests {
 
 	@Autowired
