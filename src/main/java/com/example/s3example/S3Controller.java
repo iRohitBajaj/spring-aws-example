@@ -22,7 +22,6 @@ public class S3Controller {
         this.s3Service = s3Service;
     }
 
-
     @GetMapping("")
     public ResponseEntity<List<S3ObjectSummary>> all(ServletRequest request) {
         return new ResponseEntity<>(s3Service.listAll(), HttpStatus.OK);
